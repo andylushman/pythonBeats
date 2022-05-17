@@ -1,4 +1,5 @@
 from typing import Optional
+import uuid
 from fastapi import FastAPI
 import csv
 from pydantic import BaseModel
@@ -22,7 +23,7 @@ def read_root():
 def read_artists():
     with open(artists_file, 'r') as csvfile:
         data_reader = csv.reader(csvfile)
-        artists = [{"name": row[0], "location": row[1]} for row in data_reader]
+        artists = [{"name": row[1], "location": row[2]} for row in data_reader]
         return artists
 
 
@@ -30,9 +31,17 @@ def read_artists():
 def create_artist(artist: Artist):
     with open(artists_file, 'a', newline="") as csvfile:
         data_writer = csv.writer(csvfile)
-        data_writer.writerow([artist.name, artist.location])
+        id = uuid.uuid1()
+        four_digit_id = int(str(id.int)[:4])
+        print(four_digit_id)
+        artist_key = four_digit_id
+        data_writer.writerow([artist_key, artist.name, artist.location])
 
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Optional[str] = None):
-    return {"item_id": item_id, "q": q}
+    with open(artists_file, 'r') as csvfile:
+        data_reader = csv.reader(csvfile)
+        artists = [element for element in data_reader]
+        artist = artists[item_id]
+        return {"key": artist[0], "name": artist[1], "location": artist[2]}
