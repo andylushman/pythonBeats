@@ -1,6 +1,6 @@
 from typing import Optional
 import uuid
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import csv
 from pydantic import BaseModel
 
@@ -23,7 +23,7 @@ def read_root():
 def read_artists():
     with open(artists_file, 'r') as csvfile:
         data_reader = csv.reader(csvfile)
-        artists = [{"name": row[1], "location": row[2]} for row in data_reader]
+        artists = [{"id": row[0], "name": row[1], "location": row[2]} for row in data_reader]
         return artists
 
 
@@ -38,9 +38,12 @@ def create_artist(artist: Artist):
 
 
 @app.get("/items/{item_id}")
-def read_item(item_id: int, q: Optional[str] = None):
+def read_item(item_id: str, q: Optional[str] = None):
     with open(artists_file, 'r') as csvfile:
         data_reader = csv.reader(csvfile)
-        artists = [element for element in data_reader]
-        artist = artists[item_id]
+        artists = [element for element in data_reader if element[0] == item_id]
+        if not artists:
+            raise HTTPException(status_code=404, detail="Item not found")
+        artist = artists[0]
+
         return {"key": artist[0], "name": artist[1], "location": artist[2]}
