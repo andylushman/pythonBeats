@@ -31,9 +31,8 @@ def read_artists():
 def create_artist(artist: Artist):
     with open(artists_file, 'a', newline="") as csvfile:
         data_writer = csv.writer(csvfile)
-        id = uuid.uuid1()
-        four_digit_id = int(str(id.int)[:4])
-        print(four_digit_id)
+        initial_uuid = uuid.uuid1()
+        four_digit_id = int(str(initial_uuid.int)[:4])
         artist_key = four_digit_id
         data_writer.writerow([artist_key, artist.name, artist.location])
 
